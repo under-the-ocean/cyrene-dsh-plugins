@@ -11,13 +11,17 @@
   },
   "files": [
     "lib",
-    "assets"
+    "assets",
+    "cordis.patch.yml"
   ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
   "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "inject": [
         "@deepseek-ai/dsh-client-ui-theme",

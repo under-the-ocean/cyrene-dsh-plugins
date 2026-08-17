@@ -1,0 +1,4 @@
+# cyrene-dsh bundle patch: registers the plugin row so `dsh plugin add` auto-activates it.
+- insert:
+    - id: cyrene
+      name: 'cyrene-dsh'
