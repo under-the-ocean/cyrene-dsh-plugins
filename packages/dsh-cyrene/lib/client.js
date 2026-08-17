@@ -268,8 +268,9 @@ window.__ModuleLoader__.load({
       'body[data-cyrene-skin][data-ds-dark-theme] ::-webkit-scrollbar-thumb { background: #3a2a3f; border-radius: 4px; }',
       'body[data-cyrene-skin][data-ds-dark-theme] ::-webkit-scrollbar-thumb:hover { background: #ff7da8; }',
       // Deep diving status text — replace blue gradient with pink
-      'body[data-cyrene-skin] [class*="turnStatus"] { background-image: linear-gradient(90deg, #ff5b8a 0%, #ff5b8a 40%, #ffb1cb 50%, #ff5b8a 60%, #ff5b8a 100%) !important; }',
-      'body[data-cyrene-skin][data-ds-dark-theme] [class*="turnStatus"] { background-image: linear-gradient(90deg, #ff7da8 0%, #ff7da8 40%, #ffb1cb 50%, #ff7da8 60%, #ff7da8 100%) !important; }',
+      'body[data-cyrene-skin] [class*="turnStatus"] { --dsw-static-deepseek-500: #ff5b8a; --dsw-static-deepseek-200: #ffb1cb; }',
+      'body[data-cyrene-skin][data-ds-dark-theme] [class*="turnStatus"] { --dsw-static-deepseek-500: #ff7da8; --dsw-static-deepseek-200: #ffb1cb; }',
+      'body[data-cyrene-skin] [class*="turnStatusClock"] { background: none !important; }',
     
 
       // Full-page background gradient — controlled by body[data-cy-grad]
