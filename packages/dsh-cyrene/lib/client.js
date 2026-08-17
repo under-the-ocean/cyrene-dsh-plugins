@@ -784,6 +784,33 @@ window.__ModuleLoader__.load({
 
         var settingsState = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true }
         var dirty = false
+        var fontName = null
+        var fileInputRef = null
+
+        function applyFont(font) {
+          if (!font || !font.fileName) return
+          var styleId = 'cyrene-custom-font'
+          var existing = document.getElementById(styleId)
+          if (existing) existing.remove()
+          var ext = font.fileName.split('.').pop().toLowerCase()
+          var format = ext === 'otf' ? 'opentype' : 'truetype'
+          var style = document.createElement('style')
+          style.id = styleId
+          style.textContent = "@font-face { font-family: 'CyreneCustom'; src: url('/cyrene/" + font.fileName + "') format('" + format + "'); font-display: swap; }"
+          document.head.appendChild(style)
+          document.documentElement.style.setProperty('--dsw-font-family', "'CyreneCustom', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif")
+        }
+
+        function resetFont() {
+          var existing = document.getElementById('cyrene-custom-font')
+          if (existing) existing.remove()
+          document.documentElement.style.removeProperty('--dsw-font-family')
+        }
+
+        // Load current font on startup
+        fetch('/api/cyrene/font').then(function (r) { return r.json() }).then(function (f) {
+          if (f && f.fileName) { applyFont(f); fontName = f.displayName }
+        }).catch(function () {})
 
         function applySettings(s) {
           settingsState = s
@@ -860,6 +887,48 @@ window.__ModuleLoader__.load({
               React.createElement(Toggle, { keyName: 'idleAnim', label: '待机动画' }),
               React.createElement(Toggle, { keyName: 'phaseMotions', label: '阶段动作' }),
               React.createElement(Toggle, { keyName: 'petVisible', label: '显示桌宠' }),
+              // Font section
+              React.createElement('div', { style: { borderTop: '1px solid var(--dsw-alias-border-l2)', margin: '10px 0', padding: '10px 0' } },
+                React.createElement('div', { style: { fontSize: '13px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)', marginBottom: '6px' } }, '自定义字体'),
+                React.createElement('div', { style: { fontSize: '12px', color: 'var(--dsw-alias-label-tertiary)', marginBottom: '8px' } }, '当前: ' + (fontName || '系统默认')),
+                React.createElement('input', {
+                  type: 'file', accept: '.ttf,.otf',
+                  ref: function (el) { fileInputRef = el },
+                  style: { display: 'none' },
+                  onChange: function (e) {
+                    var file = e.target.files && e.target.files[0]
+                    if (!file) return
+                    var reader = new FileReader()
+                    reader.onload = function () {
+                      var base64 = reader.result.split(',')[1]
+                      fetch('/api/cyrene/font', {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify({ name: file.name, data: base64, displayName: file.name.replace(/\.(ttf|otf)$/i, '') }),
+                      }).then(function (r) { return r.json() }).then(function (res) {
+                        if (res.ok) { applyFont(res.font); fontName = res.font.displayName }
+                      }).catch(function () {})
+                    }
+                    reader.readAsDataURL(file)
+                  },
+                }),
+                React.createElement('div', { style: { display: 'flex', gap: '6px' } },
+                  React.createElement('button', {
+                    type: 'button',
+                    onClick: function () { if (fileInputRef) fileInputRef.click() },
+                    style: { border: '1px solid var(--dsw-alias-border-l2)', color: 'var(--dsw-alias-label-primary)', background: 'transparent', borderRadius: '8px', padding: '5px 12px', fontSize: '12px', cursor: 'pointer' },
+                  }, '导入字体'),
+                  React.createElement('button', {
+                    type: 'button',
+                    onClick: function () {
+                      fetch('/api/cyrene/font/reset', { method: 'POST' }).then(function () {
+                        resetFont(); fontName = null
+                      }).catch(function () {})
+                    },
+                    style: { border: '1px solid var(--dsw-alias-border-l2)', color: 'var(--dsw-alias-label-secondary)', background: 'transparent', borderRadius: '8px', padding: '5px 12px', fontSize: '12px', cursor: 'pointer' },
+                  }, '恢复默认'),
+                ),
+              ),
             ) : null,
             // Footer — only when open
             open ? React.createElement('div', {

@@ -6,10 +6,12 @@
  * current state, settings, and pet assets (Live2D model + Cubism Core)
  * through /api/cyrene/* JSON endpoints.
  */
-import { readFile } from 'node:fs/promises'
-import { join, dirname } from 'node:path'
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
+import { join, dirname, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { existsSync } from 'node:fs'
+import { randomUUID } from 'node:crypto'
+import { homedir } from 'node:os'
 
 /** Map activity phase to animation. */
 function animationForPhase(phase) {
@@ -82,6 +84,9 @@ var __dirname = dirname(fileURLToPath(import.meta.url))
 var PACKAGE_ROOT = join(__dirname, '..')
 var ASSETS_DIR = join(PACKAGE_ROOT, 'assets', 'cyrene')
 
+// Custom font storage: $DSH_HOME/cyrene-fonts/
+var FONTS_DIR = join(process.env.DSH_HOME || homedir(), '.dsh', 'cyrene-fonts')
+
 var MIME_BY_EXT = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
@@ -89,6 +94,7 @@ var MIME_BY_EXT = {
   '.moc3': 'application/octet-stream', '.model3.json': 'application/json',
   '.physics3.json': 'application/json', '.motion3.json': 'application/json',
   '.exp3.json': 'application/json',
+  '.ttf': 'font/ttf', '.otf': 'font/otf', '.woff': 'font/woff', '.woff2': 'font/woff2',
 }
 
 function mimeFor(file) {
@@ -242,9 +248,13 @@ export function apply(ctx) {
         var segments = url.pathname.split('/').filter(Boolean)
         if (segments.length < 2 || segments[0] !== 'cyrene') { res.writeHead(404); res.end(); return }
         var filename = decodeURIComponent(segments.slice(1).join('/'))
+        // Try assets dir first, then fonts dir
         var filePath = join(ASSETS_DIR, filename)
-        if (!filePath.startsWith(ASSETS_DIR)) { res.writeHead(403); res.end(); return }
-        if (!existsSync(filePath)) { res.writeHead(404); res.end(); return }
+        if (!filePath.startsWith(ASSETS_DIR) && !filePath.startsWith(FONTS_DIR)) { res.writeHead(403); res.end(); return }
+        if (!existsSync(filePath)) {
+          filePath = join(FONTS_DIR, filename)
+          if (!filePath.startsWith(FONTS_DIR) || !existsSync(filePath)) { res.writeHead(404); res.end(); return }
+        }
         readFile(filePath).then(function (body) {
           res.writeHead(200, {
             'content-type': mimeFor(filePath), 'content-length': String(body.byteLength),
@@ -253,6 +263,56 @@ export function apply(ctx) {
           res.end(body)
         }, function () { res.writeHead(404); res.end() })
       } catch (e) { res.writeHead(500); res.end(String(e)) }
+    },
+  })
+
+  // ── Custom Font API ──
+  var currentFont = null // { fileName, displayName } or null
+
+  ctx.webServer.register({
+    kind: 'exact', path: '/api/cyrene/font',
+    handler: function (req, res) {
+      if (req.method === 'GET') {
+        json(res, 200, currentFont || { kind: 'default', displayName: '系统默认' })
+        return
+      }
+      if (req.method === 'POST') {
+        readBody(req).then(function (body) {
+          var name = body.name
+          var data = body.data // base64-encoded font file
+          if (typeof name !== 'string' || !name.match(/^[a-zA-Z0-9][a-zA-Z0-9._\s-]+\.(ttf|otf)$/i)) {
+            json(res, 400, { ok: false, error: '无效的文件名' })
+            return
+          }
+          if (typeof data !== 'string' || data.length > 50 * 1024 * 1024) {
+            json(res, 400, { ok: false, error: '无效的文件数据' })
+            return
+          }
+          var ext = extname(name).toLowerCase()
+          var fileName = 'custom-' + randomUUID() + ext
+          mkdir(FONTS_DIR, { recursive: true }).then(function () {
+            return writeFile(join(FONTS_DIR, fileName), Buffer.from(data, 'base64'))
+          }).then(function () {
+            currentFont = { fileName: fileName, displayName: body.displayName || name }
+            json(res, 200, { ok: true, font: currentFont })
+          }).catch(function (e) { json(res, 500, { ok: false, error: String(e) }) })
+        }).catch(function (e) { json(res, 400, { ok: false, error: String(e) }) })
+        return
+      }
+      json(res, 405, { ok: false, error: 'method not allowed' })
+    },
+  })
+
+  ctx.webServer.register({
+    kind: 'exact', path: '/api/cyrene/font/reset',
+    handler: function (req, res) {
+      if (req.method !== 'POST') { json(res, 405, { ok: false, error: 'method not allowed' }); return }
+      if (currentFont) {
+        var oldPath = join(FONTS_DIR, currentFont.fileName)
+        rm(oldPath, { force: true }).catch(function () {})
+      }
+      currentFont = null
+      json(res, 200, { ok: true })
     },
   })
 }
