@@ -270,6 +270,9 @@ window.__ModuleLoader__.load({
       // Thinking animation indicator (matrix dots) — pink
       'body[data-cyrene-skin] svg[class*="matrix"] rect { fill: #ff5b8a; }',
       'body[data-cyrene-skin][data-ds-dark-theme] svg[class*="matrix"] rect { fill: #ff7da8; }',
+      // DSH wordmark logo — only color the whale icon and badge rect (currentColor), keep text hollow
+      'body[data-cyrene-skin] svg[viewBox="0 0 182 24"] { color: #ff5b8a; }',
+      'body[data-cyrene-skin][data-ds-dark-theme] svg[viewBox="0 0 182 24"] { color: #ff7da8; }',
       // Deep diving status text — pink via CSS var override (preserves shimmer + gradient structure)
       'body[data-cyrene-skin] [class*="turnStatus"] { --dsw-static-deepseek-500: #ff5b8a; --dsw-static-deepseek-200: #ffb1cb; }',
       'body[data-cyrene-skin][data-ds-dark-theme] [class*="turnStatus"] { --dsw-static-deepseek-500: #ff7da8; --dsw-static-deepseek-200: #ffb1cb; }',
