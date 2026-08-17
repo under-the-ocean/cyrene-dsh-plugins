@@ -349,6 +349,13 @@ window.__ModuleLoader__.load({
         return function () { tag.remove() }
       }, 'cyrene-pet: stylesheet')
 
+      // Set body attribute so skin CSS (body[data-cyrene-skin]) takes effect
+      ctx.effect(function () {
+        if (typeof document === 'undefined') return function () {}
+        document.body.dataset.cyreneSkin = ''
+        return function () { delete document.body.dataset.cyreneSkin }
+      }, 'cyrene: skin scope')
+
       // ── Full-page background particles (Cyrene style) ────────────────
       ctx.effect(function () {
         if (typeof document === 'undefined') return function () {}
