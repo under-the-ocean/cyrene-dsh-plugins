@@ -4,7 +4,7 @@
 
 ## 插件
 
-`@dsh-local/cyrene` — 一个插件同时提供主题 + 桌宠：
+`cyrene-dsh` — 一个插件同时提供主题 + 桌宠：
 
 | 功能 | 说明 |
 |------|------|
@@ -20,12 +20,19 @@
 
 ## 安装
 
+### 从 npm（推荐）
+
 ```sh
-# 从仓库安装
+dsh plugin --profile web add cyrene-dsh
+```
+
+### 从 GitHub
+
+```sh
 dsh plugin --profile web add "github:<你的用户名>/cyrene-dsh-plugins#main:packages/dsh-cyrene"
 ```
 
-或本地开发：
+### 本地开发
 
 ```sh
 git clone https://github.com/<你的用户名>/cyrene-dsh-plugins.git

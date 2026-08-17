@@ -1,5 +1,5 @@
 {
-  "name": "@dsh-local/cyrene",
+  "name": "cyrene-dsh",
   "version": "0.2.0",
   "description": "昔涟 (Cyrene) 主题 + 桌宠 for the dsh web GUI — pearl-white pink theme, Live2D desktop pet, particle background, gradient, and a collapsible config card. Ported from Cyrene-Agent (MIT) with the Live2D model creator's permission.",
   "type": "module",
@@ -13,6 +13,10 @@
     "lib",
     "assets"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "dsh": {
     "client": {
       "inject": [
@@ -32,5 +36,13 @@
     "live2d",
     "cyrene"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/under-the-ocean/cyrene-dsh-plugins.git"
+  },
+  "bugs": {
+    "url": "https://github.com/under-the-ocean/cyrene-dsh-plugins/issues"
+  },
+  "homepage": "https://github.com/under-the-ocean/cyrene-dsh-plugins#readme"
 }
