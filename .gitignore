@@ -1,0 +1,20 @@
+# Node
+node_modules/
+*.log
+.pnpm-store/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+lib/*.map
+
+# Local plugin installs (dsh profile)
+.dsh/

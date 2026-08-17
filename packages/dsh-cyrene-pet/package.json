@@ -1,0 +1,35 @@
+{
+  "name": "@dsh-local/cyrene-pet",
+  "version": "0.1.0",
+  "description": "昔涟 (Cyrene) pet companion for the dsh web GUI — a dual-half plugin. Host half listens to session events (turn/step/tool/assistant) and projects them to pet activity states via /api/cyrene-pet/* JSON endpoints. Browser half renders a floating Cyrene avatar with status bubble and animations.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "assets"
+  ],
+  "dsh": {
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-theme",
+        "@deepseek-ai/dsh-client-runtime"
+      ],
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh",
+    "deepseek-harness",
+    "pet",
+    "companion",
+    "cyrene"
+  ],
+  "license": "MIT"
+}
