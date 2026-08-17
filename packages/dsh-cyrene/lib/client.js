@@ -859,29 +859,12 @@ window.__ModuleLoader__.load({
           )
         }
 
-        // Collapsible plugin card (like other plugin config cards)
+        // Settings page (rendered in the settings sidebar nav)
         function CyrenePetCard() {
-          var openState = React.useState(false)
-          var open = openState[0]
-          var setOpen = openState[1]
-          return React.createElement('li', {
-            style: { border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-3)', borderRadius: '12px', listStyle: 'none', marginBottom: '12px' },
-          },
-            // Header — click to toggle
-            React.createElement('button', {
-              type: 'button',
-              onClick: function () { setOpen(!open) },
-              'aria-expanded': open,
-              style: { appearance: 'none', width: '100%', font: 'inherit', color: 'inherit', textAlign: 'left', cursor: 'pointer', background: 'transparent', border: 'none', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px' },
-            },
-              React.createElement('div', { style: { flex: '1', minWidth: '0' } },
-                React.createElement('div', { style: { fontSize: '15px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)' } }, '昔涟主题'),
-                React.createElement('div', { style: { fontSize: '13px', color: 'var(--dsw-alias-label-tertiary)', marginTop: '2px' } }, '主题、粒子、桌宠开关'),
-              ),
-              React.createElement('span', { style: { color: 'var(--dsw-alias-label-tertiary)', flex: 'none', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.16s' } }, '▾'),
-            ),
-            // Body — only when open
-            open ? React.createElement('div', { style: { borderTop: '1px solid var(--dsw-alias-border-l2)', margin: '0 16px', paddingBottom: '8px' } },
+          return React.createElement('div', { style: { padding: '20px 24px' } },
+            React.createElement('h2', { style: { fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)', margin: '0 0 4px' } }, '昔涟'),
+            React.createElement('p', { style: { fontSize: '13px', color: 'var(--dsw-alias-label-tertiary)', margin: '0 0 16px' } }, '主题、粒子、桌宠与字体设置'),
+            React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-3)', borderRadius: '12px', padding: '0 16px' } },
               React.createElement(Toggle, { keyName: 'particles', label: '粒子效果' }),
               React.createElement(Toggle, { keyName: 'gradient', label: '背景渐变' }),
               React.createElement(Toggle, { keyName: 'idleAnim', label: '待机动画' }),
@@ -929,10 +912,9 @@ window.__ModuleLoader__.load({
                   }, '恢复默认'),
                 ),
               ),
-            ) : null,
-            // Footer — only when open
-            open ? React.createElement('div', {
-              style: { borderTop: '1px solid var(--dsw-alias-border-l2)', display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '12px 16px 8px' },
+            ),
+            React.createElement('div', {
+              style: { display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' },
             },
               React.createElement('button', {
                 type: 'button',
@@ -946,94 +928,19 @@ window.__ModuleLoader__.load({
                 disabled: !dirty,
                 style: { border: 'none', background: 'var(--dsw-alias-label-primary)', color: 'var(--dsw-alias-bg-layer-3)', borderRadius: '8px', padding: '5px 14px', fontSize: '13px', cursor: 'pointer' },
               }, '保存'),
-            ) : null,
+            ),
           )
         }
 
         var unregister = slots.register({
-          name: 'settings.plugin.item',
+          name: 'settings.section',
           id: 'cyrene-pet',
           order: 140,
+          label: '昔涟',
         }, CyrenePetCard)
 
         return function () { unregister() }
       }, 'cyrene-pet: settings card')
-
-      // ── Sidebar entry ─────────────────────────────────────────────────
-      ctx.effect(function () {
-        if (typeof document === 'undefined') return function () {}
-
-        var ICON = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="rgba(255,91,138,0.3)" stroke="#ff5b8a" stroke-width="1.2"/><circle cx="8" cy="6.5" r="1.5" fill="#ff5b8a"/><ellipse cx="8" cy="10.5" rx="2.5" ry="1.5" fill="rgba(255,91,138,0.5)"/></svg>'
-
-        var entry = document.createElement('button')
-        entry.type = 'button'
-        entry.dataset.dshCyreneSidebar = ''
-        entry.style.cssText = 'width:100%;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:transparent;border:none;border-radius:8px;align-items:center;gap:8px;padding:0 12px;font-size:13px;display:flex'
-        entry.innerHTML = '<span style="flex:none;display:inline-flex;justify-content:center;align-items:center">' + ICON + '</span><span style="text-overflow:ellipsis;overflow:hidden">昔涟</span>'
-        entry.addEventListener('click', function () {
-          petSettings.petVisible = !petSettings.petVisible
-          if (petSettings.petVisible) delete entry.dataset.active
-          else entry.dataset.active = 'true'
-          // Save to host
-          fetch('/api/cyrene/settings', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ petVisible: petSettings.petVisible }),
-          }).catch(function () {})
-        })
-
-        function sidebarRoot() {
-          var column = document.querySelector('[data-pane="sidebar"], [class*="sidebarCol"]')
-          if (!column) return undefined
-          var logoOwner = column.querySelector('[class*="logoRow"]')?.parentElement
-          return logoOwner || (column.firstElementChild) || undefined
-        }
-
-        function newSessionButton(root) {
-          return root.querySelector('button[class*="newSession"]') || undefined
-        }
-
-        function placeEntry(root) {
-          var button = newSessionButton(root)
-          if (!button) return false
-          if (entry.parentElement === root) return true
-          var row = button.closest('[class*="logoRow"]')
-          var base = (row && row.parentElement === root) ? row : button
-          var family = Array.from(root.children).filter(function (el) {
-            return el instanceof HTMLElement && el.matches('[data-dsh-taskboard-entry], [data-dsh-ssh-entry], [data-dsh-cyrene-sidebar]')
-          })
-          var anchor = family.length > 0 ? family[family.length - 1].nextElementSibling : base.nextElementSibling
-          root.insertBefore(entry, anchor)
-          return true
-        }
-
-        var rootEl = undefined
-        var placed = false
-
-        function tryPlace() {
-          if (rootEl !== undefined && !rootEl.isConnected) { rootObserver.disconnect(); rootEl = undefined; placed = false }
-          if (placed) { if (document.body.contains(entry)) return; rootObserver.disconnect(); rootEl = undefined; placed = false }
-          rootEl = rootEl || sidebarRoot()
-          if (!rootEl) return
-          placed = placeEntry(rootEl)
-          if (placed) rootObserver.observe(rootEl, { childList: true, subtree: true })
-        }
-
-        var rootObserver = new MutationObserver(function () { tryPlace() })
-        var waitObserver = new MutationObserver(function () { tryPlace() })
-        waitObserver.observe(document.body, { childList: true, subtree: true })
-        tryPlace()
-
-        // Sync active state with petVisible
-        if (petSettings && !petSettings.petVisible) entry.dataset.active = 'true'
-        else delete entry.dataset.active
-
-        return function () {
-          waitObserver.disconnect()
-          rootObserver.disconnect()
-          entry.remove()
-        }
-      }, 'cyrene: sidebar entry')
 
       // Cleanup on plugin stop
       ctx.effect(function () {
