@@ -147,10 +147,10 @@ window.__ModuleLoader__.load({
       '  --dsw-alias-markdown-tag: #ffd6e4;',
       '  --dsw-alias-markdown-code-segment-selected: #ffffff;',
       '  --dsw-alias-markdown-code-segment-unselected: #f5f5f7;',
-      '  --dsw-alias-scrollbar-bg-l1: #e5e5ea;',
-      '  --dsw-alias-scrollbar-bg-l2: #d2d2d7;',
-      '  --dsw-alias-scrollbar-hover-l1: #c7c7cc;',
-      '  --dsw-alias-scrollbar-hover-l2: #aeaeb2;',
+      '  --dsw-alias-scrollbar-bg-l1: #ffd6e4;',
+      '  --dsw-alias-scrollbar-bg-l2: #ffb1cb;',
+      '  --dsw-alias-scrollbar-hover-l1: #ff7da8;',
+      '  --dsw-alias-scrollbar-hover-l2: #ff5b8a;',
       '  --dsw-specific-sidebar-fill: #fafafc;',
       '  --dsw-specific-sidebar-nav-item-active: #fff1f6;',
       '  --dsw-specific-sidebar-nav-item-active-accent: #ff5b8a;',
@@ -262,6 +262,11 @@ window.__ModuleLoader__.load({
       'body[data-cyrene-skin][data-ds-dark-theme] a { color: #ff7da8; }',
       'body[data-cyrene-skin] a:hover { color: #c43a64; }',
       'body[data-cyrene-skin][data-ds-dark-theme] a:hover { color: #ffb1cb; }',
+      // Scrollbar thumb — pink across all scrollable areas
+      'body[data-cyrene-skin] ::-webkit-scrollbar-thumb { background: #ffb1cb; border-radius: 4px; }',
+      'body[data-cyrene-skin] ::-webkit-scrollbar-thumb:hover { background: #ff7da8; }',
+      'body[data-cyrene-skin][data-ds-dark-theme] ::-webkit-scrollbar-thumb { background: #3a2a3f; border-radius: 4px; }',
+      'body[data-cyrene-skin][data-ds-dark-theme] ::-webkit-scrollbar-thumb:hover { background: #ff7da8; }',
     
 
       // Full-page background gradient — controlled by body[data-cy-grad]
