@@ -267,10 +267,14 @@ window.__ModuleLoader__.load({
       'body[data-cyrene-skin] ::-webkit-scrollbar-thumb:hover { background: #ff7da8; }',
       'body[data-cyrene-skin][data-ds-dark-theme] ::-webkit-scrollbar-thumb { background: #3a2a3f; border-radius: 4px; }',
       'body[data-cyrene-skin][data-ds-dark-theme] ::-webkit-scrollbar-thumb:hover { background: #ff7da8; }',
-      // Deep diving status text — replace blue gradient with pink
+      // Thinking animation indicator (matrix dots) — pink
+      'body[data-cyrene-skin] svg[class*="matrix"] rect { fill: #ff5b8a; }',
+      'body[data-cyrene-skin][data-ds-dark-theme] svg[class*="matrix"] rect { fill: #ff7da8; }',
+      // Deep diving status text — pink via CSS var override (preserves shimmer + gradient structure)
       'body[data-cyrene-skin] [class*="turnStatus"] { --dsw-static-deepseek-500: #ff5b8a; --dsw-static-deepseek-200: #ffb1cb; }',
       'body[data-cyrene-skin][data-ds-dark-theme] [class*="turnStatus"] { --dsw-static-deepseek-500: #ff7da8; --dsw-static-deepseek-200: #ffb1cb; }',
-      'body[data-cyrene-skin] [class*="turnStatusClock"] { background: none !important; }',
+      // Clock span: prevent parent gradient from showing through
+      'body[data-cyrene-skin] [class*="turnStatusClock"] { position: relative; z-index: 1; }',
     
 
       // Full-page background gradient — controlled by body[data-cy-grad]
