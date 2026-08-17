@@ -959,6 +959,82 @@ window.__ModuleLoader__.load({
         return function () { unregister() }
       }, 'cyrene-pet: settings card')
 
+      // ── Sidebar entry ─────────────────────────────────────────────────
+      ctx.effect(function () {
+        if (typeof document === 'undefined') return function () {}
+
+        var ICON = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="rgba(255,91,138,0.3)" stroke="#ff5b8a" stroke-width="1.2"/><circle cx="8" cy="6.5" r="1.5" fill="#ff5b8a"/><ellipse cx="8" cy="10.5" rx="2.5" ry="1.5" fill="rgba(255,91,138,0.5)"/></svg>'
+
+        var entry = document.createElement('button')
+        entry.type = 'button'
+        entry.dataset.dshCyreneSidebar = ''
+        entry.style.cssText = 'width:100%;height:32px;color:var(--dsw-alias-label-secondary);cursor:pointer;white-space:nowrap;background:transparent;border:none;border-radius:8px;align-items:center;gap:8px;padding:0 12px;font-size:13px;display:flex'
+        entry.innerHTML = '<span style="flex:none;display:inline-flex;justify-content:center;align-items:center">' + ICON + '</span><span style="text-overflow:ellipsis;overflow:hidden">昔涟</span>'
+        entry.addEventListener('click', function () {
+          petSettings.petVisible = !petSettings.petVisible
+          if (petSettings.petVisible) delete entry.dataset.active
+          else entry.dataset.active = 'true'
+          // Save to host
+          fetch('/api/cyrene/settings', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ petVisible: petSettings.petVisible }),
+          }).catch(function () {})
+        })
+
+        function sidebarRoot() {
+          var column = document.querySelector('[data-pane="sidebar"], [class*="sidebarCol"]')
+          if (!column) return undefined
+          var logoOwner = column.querySelector('[class*="logoRow"]')?.parentElement
+          return logoOwner || (column.firstElementChild) || undefined
+        }
+
+        function newSessionButton(root) {
+          return root.querySelector('button[class*="newSession"]') || undefined
+        }
+
+        function placeEntry(root) {
+          var button = newSessionButton(root)
+          if (!button) return false
+          if (entry.parentElement === root) return true
+          var row = button.closest('[class*="logoRow"]')
+          var base = (row && row.parentElement === root) ? row : button
+          var family = Array.from(root.children).filter(function (el) {
+            return el instanceof HTMLElement && el.matches('[data-dsh-taskboard-entry], [data-dsh-ssh-entry], [data-dsh-cyrene-sidebar]')
+          })
+          var anchor = family.length > 0 ? family[family.length - 1].nextElementSibling : base.nextElementSibling
+          root.insertBefore(entry, anchor)
+          return true
+        }
+
+        var rootEl = undefined
+        var placed = false
+
+        function tryPlace() {
+          if (rootEl !== undefined && !rootEl.isConnected) { rootObserver.disconnect(); rootEl = undefined; placed = false }
+          if (placed) { if (document.body.contains(entry)) return; rootObserver.disconnect(); rootEl = undefined; placed = false }
+          rootEl = rootEl || sidebarRoot()
+          if (!rootEl) return
+          placed = placeEntry(rootEl)
+          if (placed) rootObserver.observe(rootEl, { childList: true, subtree: true })
+        }
+
+        var rootObserver = new MutationObserver(function () { tryPlace() })
+        var waitObserver = new MutationObserver(function () { tryPlace() })
+        waitObserver.observe(document.body, { childList: true, subtree: true })
+        tryPlace()
+
+        // Sync active state with petVisible
+        if (petSettings && !petSettings.petVisible) entry.dataset.active = 'true'
+        else delete entry.dataset.active
+
+        return function () {
+          waitObserver.disconnect()
+          rootObserver.disconnect()
+          entry.remove()
+        }
+      }, 'cyrene: sidebar entry')
+
       // Cleanup on plugin stop
       ctx.effect(function () {
         return function () {
