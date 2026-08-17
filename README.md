@@ -1,36 +1,28 @@
-# Cyrene DSH Plugins — 昔涟 dsh 插件
+# Cyrene DSH Plugin — 昔涟 dsh 插件
 
 > 把《崩坏：星穹铁道》"昔涟"（Cyrene）的 **Live2D 桌宠** 与 **珍珠白粉色主题** 移植为 DeepSeek Harness (dsh) 插件。
 
-## 插件列表
+## 插件
 
-| 插件 | 说明 | 类型 |
-|------|------|------|
-| `@dsh-local/cyrene-skin` | 昔涟 pearl-white 白调 + 粉色系主题，覆盖 DSH 设计 token | client-plugin |
-| `@dsh-local/cyrene-pet` | 昔涟 Live2D 桌宠：会话状态驱动动作、粒子背景、全页渐变、可缩放拖动 | dual-half-plugin |
+`@dsh-local/cyrene` — 一个插件同时提供主题 + 桌宠：
 
-## 功能
-
-### 皮肤（cyrene-skin）
-- 把昔涟的珍珠白 + 粉色配色映射到 DSH 的 `--dsw-alias-*` 设计 token
-- 亮/暗双配色（暗色为深紫黑 + 亮粉）
-- 粉色选区、焦点环、链接色
-
-### 桌宠（cyrene-pet）
-- **真实 Live2D 模型渲染**（WebGL，呼吸/眨眼物理）
-- **会话状态驱动动作**：thinking / tool / review / done / failed 阶段自动播放对应动作
-- **全页粒子动效** + **全页渐变背景**（移植自昔涟聊天界面）
-- **四边四角缩放**（像 Windows 窗口一样拖拽边缘缩放）
-- **拖动 reposition** + **点击随机表情**（4 秒自动回正）
-- **位置/缩放持久化**
-- **插件配置卡片**（可折叠）：粒子 / 背景渐变 / 待机动画 / 阶段动作 开关
+| 功能 | 说明 |
+|------|------|
+| **昔涟主题** | pearl-white 白调 + 粉色系，覆盖 DSH 设计 token（亮/暗双配色） |
+| **Live2D 桌宠** | 真实 Live2D 模型渲染（WebGL，呼吸/眨眼物理） |
+| **会话状态驱动** | thinking / tool / review / done / failed 阶段自动播放对应动作 |
+| **粒子动效** | 全页粉色-紫色粒子背景（移植自昔涟聊天界面） |
+| **背景渐变** | 全页渐变背景（亮色白粉 / 暗色深紫黑） |
+| **四边四角缩放** | 像 Windows 窗口一样拖拽边缘缩放 |
+| **拖动 + 点击表情** | 拖动 reposition，点击随机表情（4 秒自动回正） |
+| **位置/缩放持久化** | 重启后恢复 |
+| **配置卡片** | 可折叠插件配置：粒子 / 渐变 / 待机动画 / 阶段动作 / 显示桌宠 |
 
 ## 安装
 
 ```sh
 # 从仓库安装
-dsh plugin --profile web add "github:<你的用户名>/cyrene-dsh-plugins#main:packages/dsh-cyrene-skin"
-dsh plugin --profile web add "github:<你的用户名>/cyrene-dsh-plugins#main:packages/dsh-cyrene-pet"
+dsh plugin --profile web add "github:<你的用户名>/cyrene-dsh-plugins#main:packages/dsh-cyrene"
 ```
 
 或本地开发：
@@ -38,8 +30,7 @@ dsh plugin --profile web add "github:<你的用户名>/cyrene-dsh-plugins#main:p
 ```sh
 git clone https://github.com/<你的用户名>/cyrene-dsh-plugins.git
 cd cyrene-dsh-plugins
-dsh plugin --profile web add link:$(pwd)/packages/dsh-cyrene-skin
-dsh plugin --profile web add link:$(pwd)/packages/dsh-cyrene-pet
+dsh plugin --profile web add link:$(pwd)/packages/dsh-cyrene
 ```
 
 安装后**重启 `dsh web`** 并刷新页面。
@@ -47,16 +38,11 @@ dsh plugin --profile web add link:$(pwd)/packages/dsh-cyrene-pet
 ## 架构
 
 ```
-packages/
-├── dsh-cyrene-skin/          # 皮肤插件（client-only）
-│   └── lib/
-│       ├── index.js          # 宿主空载体
-│       └── client.js         # 浏览器半区：token 覆盖 + 全局样式
-└── dsh-cyrene-pet/           # 桌宠插件（dual-half）
-    ├── lib/
-    │   ├── index.js          # 宿主：会话事件 → 状态机 + API + 资源路由
-    │   └── client.js         # 浏览器：Live2D 渲染 + 粒子 + 交互 + 设置卡片
-    └── assets/cyrene/        # Live2D 模型 + Cubism Core
+packages/dsh-cyrene/
+├── lib/
+│   ├── index.js          # 宿主：会话事件 → 状态机 + API + 资源路由
+│   └── client.js         # 浏览器：主题 token + Live2D + 粒子 + 交互 + 设置卡片
+└── assets/cyrene/        # Live2D 模型 + Cubism Core
 ```
 
 ## 依赖
@@ -64,7 +50,7 @@ packages/
 浏览器半区动态加载（CDN）：
 - `pixi.js@7.4.2`（jsdelivr）
 - `pixi-live2d-display` cubism4 构建（jsdelivr）
-- Cubism Core 与 Live2D 模型由插件自身资源路由提供（`/cyrene-pet/*`）
+- Cubism Core 与 Live2D 模型由插件自身资源路由提供（`/cyrene/*`）
 
 ## 移植来源与授权
 

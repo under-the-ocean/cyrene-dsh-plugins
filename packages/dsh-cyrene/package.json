@@ -1,7 +1,7 @@
 {
-  "name": "@dsh-local/cyrene-pet",
-  "version": "0.1.0",
-  "description": "昔涟 (Cyrene) pet companion for the dsh web GUI — a dual-half plugin. Host half listens to session events (turn/step/tool/assistant) and projects them to pet activity states via /api/cyrene-pet/* JSON endpoints. Browser half renders a floating Cyrene avatar with status bubble and animations.",
+  "name": "@dsh-local/cyrene",
+  "version": "0.2.0",
+  "description": "昔涟 (Cyrene) 主题 + 桌宠 for the dsh web GUI — pearl-white pink theme, Live2D desktop pet, particle background, gradient, and a collapsible config card. Ported from Cyrene-Agent (MIT) with the Live2D model creator's permission.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -27,8 +27,9 @@
     "dsh-plugin",
     "dsh",
     "deepseek-harness",
+    "theme",
     "pet",
-    "companion",
+    "live2d",
     "cyrene"
   ],
   "license": "MIT"
