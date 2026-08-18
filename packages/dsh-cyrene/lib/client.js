@@ -876,10 +876,12 @@ window.__ModuleLoader__.load({
 
         function loadSettings() {
           fetch('/api/cyrene/settings').then(function (r) { return r.json() }).then(function (s) {
-            applySettings(s)
+            applySettings(s); if (refreshComponent) refreshComponent()
           }).catch(function () {})
         }
         loadSettings()
+
+        var refreshComponent = null
 
         function saveAll() {
           fetch('/api/cyrene/settings', {
@@ -887,7 +889,7 @@ window.__ModuleLoader__.load({
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify(settingsState),
           }).then(function (r) { return r.json() }).then(function (res) {
-            if (res.ok) { applySettings(res.settings); dirty = false }
+            if (res.ok) { applySettings(res.settings); dirty = false; if (refreshComponent) refreshComponent() }
           }).catch(function () {})
         }
 
@@ -913,7 +915,11 @@ window.__ModuleLoader__.load({
 
         // Settings page (rendered in the settings sidebar nav)
         function CyrenePetCard() {
-          return React.createElement('div', { style: { padding: '20px 24px' } },
+          var tickState = React.useState(0)
+          var tick = tickState[0]
+          var setTick = tickState[1]
+          refreshComponent = function () { setTick(tick + 1) }
+          return React.createElement('div', { key: tick, style: { padding: '20px 24px' } },
             React.createElement('h2', { style: { fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)', margin: '0 0 4px' } }, '昔涟'),
             React.createElement('p', { style: { fontSize: '13px', color: 'var(--dsw-alias-label-tertiary)', margin: '0 0 16px' } }, '主题、粒子、桌宠与字体设置'),
             React.createElement('div', { style: { border: '1px solid var(--dsw-alias-border-l2)', background: 'var(--dsw-alias-bg-layer-3)', borderRadius: '12px', padding: '0 16px' } },
