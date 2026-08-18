@@ -473,7 +473,7 @@ window.__ModuleLoader__.load({
       var petPos = { right: 24, bottom: 20 }
       var pendingConfig = null
       var lastTextureQuality = 'low'
-      var petSettings = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low' }
+      var petSettings = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low', petZIndex: 2147483000 }
 
       // Reload the Live2D model (e.g. after texture quality change).
       function reloadLive2D() {
@@ -760,7 +760,11 @@ window.__ModuleLoader__.load({
         } else {
           root.render(React.createElement('div', {
             className: 'cyrene-pet-root',
-            style: { right: petPos.right + 'px', bottom: petPos.bottom + 'px' },
+            style: {
+              right: petPos.right + 'px',
+              bottom: petPos.bottom + 'px',
+              zIndex: String(petSettings.petZIndex || 2147483000),
+            },
           }, bubble, canvasWrap))
         }
       }
@@ -817,7 +821,7 @@ window.__ModuleLoader__.load({
         var slots = ctx.get('slots')
         if (!slots) return function () {}
 
-        var settingsState = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low' }
+        var settingsState = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low', petZIndex: 2147483000 }
         var dirty = false
         var fontName = null
         var fileInputRef = null
@@ -862,6 +866,11 @@ window.__ModuleLoader__.load({
           if (s.textureQuality && s.textureQuality !== lastTextureQuality) {
             lastTextureQuality = s.textureQuality
             reloadLive2D()
+          }
+          // Pet layer (z-index) — apply to the floating pet root.
+          if (typeof s.petZIndex === 'number') {
+            var petRoot = document.querySelector('.cyrene-pet-root')
+            if (petRoot) petRoot.style.zIndex = String(s.petZIndex)
           }
         }
 
@@ -926,6 +935,38 @@ window.__ModuleLoader__.load({
                 },
                   React.createElement('option', { value: 'low' }, '低配 (2048, 兼容性好)'),
                   React.createElement('option', { value: 'high' }, '高清 (8192, 高配设备)'),
+                ),
+              ),
+              // Pet layer (z-index) — number input + quick presets
+              React.createElement('div', {
+                style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--dsw-alias-border-l2)' },
+              },
+                React.createElement('span', { style: { fontSize: '13px', color: 'var(--dsw-alias-label-primary)' } }, '桌宠图层 (z-index)'),
+                React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: '6px' } },
+                  React.createElement('input', {
+                    type: 'number', min: 0, max: 2147483647, step: 100,
+                    value: settingsState.petZIndex || 2147483000,
+                    onChange: function (e) {
+                      var v = parseInt(e.target.value, 10)
+                      setField('petZIndex', isNaN(v) ? 0 : v)
+                    },
+                    style: { width: '110px', background: 'var(--dsw-alias-bg-module-platform)', color: 'var(--dsw-alias-label-primary)', border: '1px solid var(--dsw-alias-border-l2)', borderRadius: '6px', padding: '3px 8px', fontSize: '13px', textAlign: 'right' },
+                  }),
+                  React.createElement('select', {
+                    value: 'preset',
+                    onChange: function (e) {
+                      var v = e.target.value
+                      if (v === 'behind') setField('petZIndex', 1)
+                      else if (v === 'normal') setField('petZIndex', 1000)
+                      else if (v === 'front') setField('petZIndex', 2147483000)
+                    },
+                    style: { background: 'var(--dsw-alias-bg-module-platform)', color: 'var(--dsw-alias-label-primary)', border: '1px solid var(--dsw-alias-border-l2)', borderRadius: '6px', padding: '3px 8px', fontSize: '13px' },
+                  },
+                    React.createElement('option', { value: 'preset' }, '预设'),
+                    React.createElement('option', { value: 'behind' }, '最底层'),
+                    React.createElement('option', { value: 'normal' }, '普通层'),
+                    React.createElement('option', { value: 'front' }, '最顶层'),
+                  ),
                 ),
               ),
               // Font section

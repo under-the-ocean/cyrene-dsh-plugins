@@ -225,6 +225,7 @@ export function apply(ctx) {
   var pluginSettings = {
     particles: true, gradient: true, idleAnim: true, phaseMotions: true,
     petVisible: true, skinCss: true, textureQuality: 'low',
+    petZIndex: 2147483000,
   }
   ctx.webServer.register({
     kind: 'exact', path: '/api/cyrene/settings',
@@ -237,6 +238,9 @@ export function apply(ctx) {
           }
           if (body.textureQuality === 'low' || body.textureQuality === 'high') {
             pluginSettings.textureQuality = body.textureQuality
+          }
+          if (typeof body.petZIndex === 'number') {
+            pluginSettings.petZIndex = Math.max(0, Math.min(2147483647, Math.round(body.petZIndex)))
           }
           json(res, 200, { ok: true, settings: pluginSettings })
         }).catch(function (e) { json(res, 400, { ok: false, error: String(e) }) })
