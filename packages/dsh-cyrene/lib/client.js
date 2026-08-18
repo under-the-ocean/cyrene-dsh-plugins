@@ -1055,6 +1055,8 @@ window.__ModuleLoader__.load({
       }, 'cyrene-pet: dispose')
     }
 
+    exports.name = 'dsh-cyrene'
+    exports.inject = ['slots', 'theme']
     exports.apply = apply
     return module.exports
   },
