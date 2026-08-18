@@ -17,7 +17,7 @@
  * Plain JS ONLY (no import/JSX). React arrives via require('react').
  */
 window.__ModuleLoader__.load({
-  id: 'cyrene-dsh',
+  id: 'dsh-cyrene',
   factory: (require) => {
     var module = { exports: {} }
     var exports = module.exports
@@ -355,10 +355,10 @@ window.__ModuleLoader__.load({
       // Inject stylesheet
       ctx.effect(function () {
         if (typeof document === 'undefined') return function () {}
-        var tagId = 'cyrene-dsh/pet.css'
+        var tagId = 'dsh-cyrene/pet.css'
         if (document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']')) return function () {}
         var tag = document.createElement('style')
-        tag.dataset.plugin = 'cyrene-dsh'
+        tag.dataset.plugin = 'dsh-cyrene'
         tag.dataset.pluginCss = tagId
         tag.textContent = CSS
         document.head.appendChild(tag)
