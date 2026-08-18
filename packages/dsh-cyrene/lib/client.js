@@ -1031,12 +1031,14 @@ window.__ModuleLoader__.load({
           )
         }
 
-        var unregister = slots.register({
-          name: 'settings.section',
-          id: 'cyrene-pet',
-          order: 140,
-          label: '昔涟',
-        }, CyrenePetCard)
+        var unregister = slots.inject('settings.section', function () {
+          return slots.register({
+            name: 'settings.section',
+            id: 'cyrene-pet',
+            order: 140,
+            label: '昔涟',
+          }, CyrenePetCard)
+        })
 
         return function () { unregister() }
       }, 'cyrene-pet: settings card')
