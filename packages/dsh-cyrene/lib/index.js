@@ -222,15 +222,21 @@ export function apply(ctx) {
     },
   })
 
-  var pluginSettings = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true }
+  var pluginSettings = {
+    particles: true, gradient: true, idleAnim: true, phaseMotions: true,
+    petVisible: true, skinCss: true, textureQuality: 'low',
+  }
   ctx.webServer.register({
     kind: 'exact', path: '/api/cyrene/settings',
     handler: function (req, res) {
       if (req.method === 'GET') { json(res, 200, pluginSettings); return }
       if (req.method === 'POST') {
         readBody(req).then(function (body) {
-          for (var k of ['particles', 'gradient', 'idleAnim', 'phaseMotions', 'petVisible']) {
+          for (var k of ['particles', 'gradient', 'idleAnim', 'phaseMotions', 'petVisible', 'skinCss']) {
             if (typeof body[k] === 'boolean') pluginSettings[k] = body[k]
+          }
+          if (body.textureQuality === 'low' || body.textureQuality === 'high') {
+            pluginSettings.textureQuality = body.textureQuality
           }
           json(res, 200, { ok: true, settings: pluginSettings })
         }).catch(function (e) { json(res, 400, { ok: false, error: String(e) }) })
@@ -248,6 +254,11 @@ export function apply(ctx) {
         var segments = url.pathname.split('/').filter(Boolean)
         if (segments.length < 2 || segments[0] !== 'cyrene') { res.writeHead(404); res.end(); return }
         var filename = decodeURIComponent(segments.slice(1).join('/'))
+        // Model texture: serve texture_low.png / texture_high.png by setting.
+        // model3.json always refers to texture_0.png; we alias it at serve time.
+        if (filename === 'model/texture_0.png') {
+          filename = 'model/texture_' + (pluginSettings.textureQuality === 'high' ? 'high' : 'low') + '.png'
+        }
         // Try assets dir first, then fonts dir
         var filePath = join(ASSETS_DIR, filename)
         if (!filePath.startsWith(ASSETS_DIR) && !filePath.startsWith(FONTS_DIR)) { res.writeHead(403); res.end(); return }

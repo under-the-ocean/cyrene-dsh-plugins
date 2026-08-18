@@ -472,7 +472,19 @@ window.__ModuleLoader__.load({
       var baseScale = 1.0
       var petPos = { right: 24, bottom: 20 }
       var pendingConfig = null
-      var petSettings = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true }
+      var lastTextureQuality = 'low'
+      var petSettings = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low' }
+
+      // Reload the Live2D model (e.g. after texture quality change).
+      function reloadLive2D() {
+        if (!live2dApp || !live2dApp.model) return
+        try { live2dApp.app.destroy(true, { children: true, texture: true }) } catch (e) {}
+        live2dApp = null
+        modelReady = false
+        modelError = null
+        render()
+        // The canvas ref callback in render() will call setupLive2D on the new canvas.
+      }
 
       // Load persisted config (position + zoom) on startup.
       function loadConfig() {
@@ -805,7 +817,7 @@ window.__ModuleLoader__.load({
         var slots = ctx.get('slots')
         if (!slots) return function () {}
 
-        var settingsState = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true }
+        var settingsState = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low' }
         var dirty = false
         var fontName = null
         var fileInputRef = null
@@ -843,6 +855,14 @@ window.__ModuleLoader__.load({
           else delete document.body.dataset.cyGrad
           if (s.particles) document.body.dataset.cyParticles = ''
           else delete document.body.dataset.cyParticles
+          // Skin CSS master switch: toggles body[data-cyrene-skin] scope.
+          if (s.skinCss) document.body.dataset.cyreneSkin = ''
+          else delete document.body.dataset.cyreneSkin
+          // Texture quality switch: reload the model so the new texture applies.
+          if (s.textureQuality && s.textureQuality !== lastTextureQuality) {
+            lastTextureQuality = s.textureQuality
+            reloadLive2D()
+          }
         }
 
         function loadSettings() {
@@ -893,6 +913,21 @@ window.__ModuleLoader__.load({
               React.createElement(Toggle, { keyName: 'idleAnim', label: '待机动画' }),
               React.createElement(Toggle, { keyName: 'phaseMotions', label: '阶段动作' }),
               React.createElement(Toggle, { keyName: 'petVisible', label: '显示桌宠' }),
+              React.createElement(Toggle, { keyName: 'skinCss', label: '皮肤 CSS（粉色主题总开关）' }),
+              // Texture quality selector
+              React.createElement('label', {
+                style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid var(--dsw-alias-border-l2)', cursor: 'pointer' },
+              },
+                React.createElement('span', { style: { fontSize: '13px', color: 'var(--dsw-alias-label-primary)' } }, '模型纹理质量'),
+                React.createElement('select', {
+                  value: settingsState.textureQuality || 'low',
+                  onChange: function (e) { setField('textureQuality', e.target.value) },
+                  style: { background: 'var(--dsw-alias-bg-module-platform)', color: 'var(--dsw-alias-label-primary)', border: '1px solid var(--dsw-alias-border-l2)', borderRadius: '6px', padding: '3px 8px', fontSize: '13px' },
+                },
+                  React.createElement('option', { value: 'low' }, '低配 (2048, 兼容性好)'),
+                  React.createElement('option', { value: 'high' }, '高清 (8192, 高配设备)'),
+                ),
+              ),
               // Font section
               React.createElement('div', { style: { borderTop: '1px solid var(--dsw-alias-border-l2)', margin: '10px 0', padding: '10px 0' } },
                 React.createElement('div', { style: { fontSize: '13px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)', marginBottom: '6px' } }, '自定义字体'),
