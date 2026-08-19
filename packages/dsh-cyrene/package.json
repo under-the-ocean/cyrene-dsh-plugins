@@ -43,10 +43,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/under-the-ocean/cyrene-dsh-plugins.git"
+    "url": "git+https://github.com/under-the-ocean/dsh-plugin-cyrene.git"
   },
   "bugs": {
-    "url": "https://github.com/under-the-ocean/cyrene-dsh-plugins/issues"
+    "url": "https://github.com/under-the-ocean/dsh-plugin-cyrene/issues"
   },
-  "homepage": "https://github.com/under-the-ocean/cyrene-dsh-plugins#readme"
+  "homepage": "https://github.com/under-the-ocean/dsh-plugin-cyrene#readme"
 }
