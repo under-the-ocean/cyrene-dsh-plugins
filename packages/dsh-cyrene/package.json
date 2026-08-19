@@ -1,6 +1,6 @@
 {
   "name": "dsh-cyrene",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "昔涟 (Cyrene) 主题 + 桌宠 for the dsh web GUI — pearl-white pink theme, Live2D desktop pet, particle background, gradient, and a collapsible config card. Ported from Cyrene-Agent (MIT) with the Live2D model creator's permission.",
   "type": "module",
   "main": "lib/index.js",

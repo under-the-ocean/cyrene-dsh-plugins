@@ -506,14 +506,50 @@ window.__ModuleLoader__.load({
       var petSettings = { particles: true, gradient: true, idleAnim: true, phaseMotions: true, petVisible: true, skinCss: true, textureQuality: 'low', petZIndex: 2147483000 }
 
       // Reload the Live2D model (e.g. after texture quality change).
-      function reloadLive2D() {
-        if (!live2dApp || !live2dApp.model) return
-        try { live2dApp.app.destroy(true, { children: true, texture: true }) } catch (e) {}
-        live2dApp = null
-        modelReady = false
-        modelError = null
-        render()
-        // The canvas ref callback in render() will call setupLive2D on the new canvas.
+      // Reuse the existing PIXI app + WebGL context and only swap the model,
+      // so shaders aren't recompiled from a freshly-created context (which
+      // trips `checkMaxIfStatementsInShader` with 0 on some GPUs).
+      async function reloadLive2D() {
+        if (disposed) return
+        try {
+          var eng = await initEngine()
+          var canvas = null
+          if (live2dApp && live2dApp.app && live2dApp.canvas) {
+            // Reuse the existing app; dispose just its stage children (model).
+            var app = live2dApp.app
+            app.stage.removeChildren().forEach(function (child) {
+              try { child.destroy({ children: true, texture: true }) } catch (e2) {}
+            })
+            canvas = live2dApp.canvas
+            var model = await eng.live2d.Live2DModel.from(MODEL_URL, {
+              ticker: app.ticker,
+              autoHitTest: false,
+              autoFocus: false,
+            })
+            app.stage.addChild(model)
+            model.anchor.set(0.5, 0.5)
+            var cw = live2dApp.app.renderer.width || canvas.clientWidth || 220
+            var chh = live2dApp.app.renderer.height || canvas.clientHeight || 280
+            var scaleX = cw / model.width
+            var scaleY = chh / model.height
+            baseScale = Math.min(scaleX, scaleY, 1.0)
+            model.scale.set(baseScale * zoom)
+            model.x = cw / 2
+            model.y = chh / 2
+            live2dApp.model = model
+            modelReady = true
+            modelError = null
+            render()
+          } else {
+            // No existing app — do the full setup on a fresh/detached canvas.
+            render()
+          }
+        } catch (err) {
+          console.error('[cyrene-pet] Live2D reload failed:', err)
+          modelReady = false
+          modelError = err instanceof Error ? err.message : String(err)
+          render()
+        }
       }
 
       // Load persisted config (position + zoom) on startup.
