@@ -538,14 +538,17 @@ window.__ModuleLoader__.load({
             })
             app.stage.addChild(model)
             model.anchor.set(0.5, 0.5)
-            var cw = live2dApp.app.renderer.width || canvas.clientWidth || 220
-            var chh = live2dApp.app.renderer.height || canvas.clientHeight || 280
-            var scaleX = cw / model.width
-            var scaleY = chh / model.height
+            // Use CSS pixels (clientWidth/Height), not renderer physical pixels
+            // (which already include the DPR resolution multiplier). Mixing them
+            // up-scaled the model ~2x → clipped/partial display when reloading.
+            var cssW = canvas.clientWidth || (canvas.parentElement ? canvas.parentElement.clientWidth : 220) || 220
+            var cssH = canvas.clientHeight || (canvas.parentElement ? canvas.parentElement.clientHeight : 280) || 280
+            var scaleX = cssW / model.width
+            var scaleY = cssH / model.height
             baseScale = Math.min(scaleX, scaleY, 1.0)
             model.scale.set(baseScale * zoom)
-            model.x = cw / 2
-            model.y = chh / 2
+            model.x = cssW / 2
+            model.y = cssH / 2
             live2dApp.model = model
             modelReady = true
             modelError = null
