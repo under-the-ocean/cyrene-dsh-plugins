@@ -29,14 +29,14 @@ dsh plugin --profile web add dsh-cyrene
 ### 从 GitHub
 
 ```sh
-dsh plugin --profile web add "github:<你的用户名>/dsh-cyrene-plugins#main:packages/dsh-cyrene"
+dsh plugin --profile web add "github:under-the-ocean/dsh-plugin-cyrene#main:packages/dsh-cyrene"
 ```
 
 ### 本地开发
 
 ```sh
-git clone https://github.com/<你的用户名>/dsh-cyrene-plugins.git
-cd dsh-cyrene-plugins
+git clone https://github.com/under-the-ocean/dsh-plugin-cyrene.git
+cd dsh-plugin-cyrene
 dsh plugin --profile web add link:$(pwd)/packages/dsh-cyrene
 ```
 
