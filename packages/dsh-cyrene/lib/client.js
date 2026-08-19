@@ -372,6 +372,36 @@ window.__ModuleLoader__.load({
         return function () { delete document.body.dataset.cyreneSkin }
       }, 'cyrene: skin scope')
 
+      // ── Persisted custom font: apply on every load regardless of UI ──
+      // The font file + meta are saved server-side (FONTS_DIR + font-meta.json),
+      // so a saved font must apply on every page load without needing to
+      // re-import it. Runs independent of the settings panel (no slots dep).
+      ctx.effect(function () {
+        if (typeof document === 'undefined') return function () {}
+        function applyFontTo(font) {
+          if (!font || !font.fileName) return
+          var styleId = 'cyrene-custom-font'
+          var existing = document.getElementById(styleId)
+          if (existing) existing.remove()
+          var ext = font.fileName.split('.').pop().toLowerCase()
+          var format = ext === 'otf' ? 'opentype' : 'truetype'
+          var style = document.createElement('style')
+          style.id = styleId
+          style.textContent = "@font-face { font-family: 'CyreneCustom'; src: url('/cyrene/" + font.fileName + "') format('" + format + "'); font-display: swap; }"
+          document.head.appendChild(style)
+          document.documentElement.style.setProperty('--dsw-font-family', "'CyreneCustom', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif")
+        }
+        var attempts = 0
+        function load() {
+          if (document.body === null && attempts < 20) { attempts++; window.setTimeout(load, 250); return }
+          fetch('/api/cyrene/font').then(function (r) { return r.json() }).then(function (f) {
+            if (f && f.fileName) applyFontTo(f)
+          }).catch(function () {})
+        }
+        load()
+        return function () {}
+      }, 'cyrene: persisted font')
+
       // ── Full-page background particles (Cyrene style) ────────────────
       ctx.effect(function () {
         if (typeof document === 'undefined') return function () {}

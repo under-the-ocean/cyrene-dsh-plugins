@@ -282,7 +282,30 @@ export function apply(ctx) {
   })
 
   // ── Custom Font API ──
+  var FONT_META_FILE = join(FONTS_DIR, 'font-meta.json')
   var currentFont = null // { fileName, displayName } or null
+
+  // Restore a previously saved font across dsh restarts: the font file lives in
+  // FONTS_DIR and its display metadata in font-meta.json. Scan both so the font
+  // keeps applying after a restart without re-importing.
+  function loadPersistedFont() {
+    return readFile(FONT_META_FILE, 'utf8').then(function (text) {
+      var meta = JSON.parse(text)
+      if (meta && typeof meta.fileName === 'string' && existsSync(join(FONTS_DIR, meta.fileName))) {
+        currentFont = { fileName: meta.fileName, displayName: meta.displayName || meta.fileName }
+      }
+    }).catch(function () { /* no persisted font yet */ })
+  }
+  loadPersistedFont()
+
+  function persistFontMeta() {
+    return mkdir(FONTS_DIR, { recursive: true })
+      .then(function () { return writeFile(FONT_META_FILE, JSON.stringify(currentFont)) })
+      .catch(function () {})
+  }
+  function clearFontMeta() {
+    return rm(FONT_META_FILE, { force: true }).catch(function () {})
+  }
 
   ctx.webServer.register({
     kind: 'exact', path: '/api/cyrene/font',
@@ -305,10 +328,17 @@ export function apply(ctx) {
           }
           var ext = extname(name).toLowerCase()
           var fileName = 'custom-' + randomUUID() + ext
+          var oldFont = currentFont
           mkdir(FONTS_DIR, { recursive: true }).then(function () {
             return writeFile(join(FONTS_DIR, fileName), Buffer.from(data, 'base64'))
           }).then(function () {
             currentFont = { fileName: fileName, displayName: body.displayName || name }
+            // Delete the previous font file (and keep only the new one).
+            if (oldFont && oldFont.fileName !== fileName) {
+              rm(join(FONTS_DIR, oldFont.fileName), { force: true }).catch(function () {})
+            }
+            return persistFontMeta()
+          }).then(function () {
             json(res, 200, { ok: true, font: currentFont })
           }).catch(function (e) { json(res, 500, { ok: false, error: String(e) }) })
         }).catch(function (e) { json(res, 400, { ok: false, error: String(e) }) })
@@ -327,7 +357,7 @@ export function apply(ctx) {
         rm(oldPath, { force: true }).catch(function () {})
       }
       currentFont = null
-      json(res, 200, { ok: true })
+      clearFontMeta().then(function () { json(res, 200, { ok: true }) })
     },
   })
 }
