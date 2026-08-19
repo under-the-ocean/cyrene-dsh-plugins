@@ -896,6 +896,8 @@ window.__ModuleLoader__.load({
         function setField(key, value) {
           settingsState[key] = value
           dirty = true
+          // Force re-render so the toggled control reflects immediately.
+          if (refreshComponent) refreshComponent()
         }
 
         // Toggle row (staged edit, not immediate save)
@@ -918,7 +920,7 @@ window.__ModuleLoader__.load({
           var tickState = React.useState(0)
           var tick = tickState[0]
           var setTick = tickState[1]
-          refreshComponent = function () { setTick(tick + 1) }
+          refreshComponent = function () { setTick(function (prev) { return prev + 1 }) }
           return React.createElement('div', { key: tick, style: { padding: '20px 24px' } },
             React.createElement('h2', { style: { fontSize: '18px', fontWeight: 600, color: 'var(--dsw-alias-label-primary)', margin: '0 0 4px' } }, '昔涟'),
             React.createElement('p', { style: { fontSize: '13px', color: 'var(--dsw-alias-label-tertiary)', margin: '0 0 16px' } }, '主题、粒子、桌宠与字体设置'),
