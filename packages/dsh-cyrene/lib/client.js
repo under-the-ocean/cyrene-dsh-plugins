@@ -513,7 +513,17 @@ window.__ModuleLoader__.load({
         if (disposed) return
         try {
           var eng = await initEngine()
-          var canvas = null
+          // Clear PIXI texture caches so a re-fetched texture_0.png with a new
+          // size (low vs high quality) isn't served from the URL-keyed cache.
+          var pixiUtils = eng.pixi && eng.pixi.utils
+          if (pixiUtils && pixiUtils.TextureCache) {
+            var texKeys = Object.keys(pixiUtils.TextureCache)
+            for (var ti = 0; ti < texKeys.length; ti++) delete pixiUtils.TextureCache[texKeys[ti]]
+          }
+          if (pixiUtils && pixiUtils.BaseTextureCache) {
+            var bKeys = Object.keys(pixiUtils.BaseTextureCache)
+            for (var bi = 0; bi < bKeys.length; bi++) delete pixiUtils.BaseTextureCache[bKeys[bi]]
+          }
           if (live2dApp && live2dApp.app && live2dApp.canvas) {
             // Reuse the existing app; dispose just its stage children (model).
             var app = live2dApp.app
